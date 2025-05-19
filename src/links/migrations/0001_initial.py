@@ -7,18 +7,33 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Link',
+            name="Link",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('link_hash', models.CharField(max_length=6, unique=True)),
-                ('url', models.URLField(unique=True)),
-                ('creation_date', models.DateTimeField(auto_now_add=True, verbose_name='Date created')),
-                ('hits', models.PositiveIntegerField(default=0, verbose_name='Hit count')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("link_hash", models.CharField(max_length=6, unique=True)),
+                ("url", models.URLField(unique=True)),
+                (
+                    "creation_date",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Date created"
+                    ),
+                ),
+                (
+                    "hits",
+                    models.PositiveIntegerField(default=0, verbose_name="Hit count"),
+                ),
             ],
         ),
     ]

@@ -8,24 +8,48 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('links', '0001_initial'),
+        ("links", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='link',
-            name='link_hash',
-            field=models.CharField(max_length=6, unique=True, validators=[django.core.validators.MinLengthValidator(6)]),
+            model_name="link",
+            name="link_hash",
+            field=models.CharField(
+                max_length=6,
+                unique=True,
+                validators=[django.core.validators.MinLengthValidator(6)],
+            ),
         ),
         migrations.CreateModel(
-            name='LinkHit',
+            name="LinkHit",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('creation_date', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='Date created')),
-                ('link', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='link_hits', to='links.link')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "creation_date",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="Date created"
+                    ),
+                ),
+                (
+                    "link",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="link_hits",
+                        to="links.link",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-creation_date'],
+                "ordering": ["-creation_date"],
             },
         ),
     ]
