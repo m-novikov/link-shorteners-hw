@@ -5,6 +5,7 @@ from links import views
 
 router = routers.DefaultRouter()
 router.register(r'links', views.LinkViewSet)
+router.register(r'hits', views.LinkHitViewSet)
 
 
 urlpatterns = [

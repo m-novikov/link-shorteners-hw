@@ -8,3 +8,11 @@ class Link(models.Model):
     url = models.URLField(unique=True, null=False)
     creation_date = models.DateTimeField("Date created", auto_now_add=True)
     hits = models.PositiveIntegerField("Hit count", default=0)
+
+
+class LinkHit(models.Model):
+    creation_date = models.DateTimeField("Date created", auto_now_add=True, db_index=True)
+    link = models.ForeignKey(Link, on_delete=models.CASCADE, related_name='link_hits')
+
+    class Meta:
+        ordering = ['-creation_date']

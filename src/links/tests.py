@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.db import IntegrityError
-from links.models import Link
+from links.models import Link, LinkHit
 from rest_framework.test import APIClient
 from rest_framework import status
 
@@ -38,6 +38,8 @@ class LinkAPITestCase(TestCase):
     def setUp(self):
         self.api_client = APIClient()
         self.api_client.force_authenticate()
+        self.link = Link.objects.create(link_hash="LINKAA", url="https://linkaa.com")
+        self.other_link = Link.objects.create(link_hash="LINKBB", url="https://linkbb.com")
 
     def test_create_link(self):
         url = 'https://link01.com'
@@ -69,8 +71,42 @@ class LinkAPITestCase(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_redirection_link(self):
-        url = "https://yandex.com"
-        link_hash = "YANDEX"
-        Link.objects.create(link_hash=link_hash, url=url)
-        resp = self.api_client.get(f'/{link_hash}', format='json', follow=False)
+        resp = self.api_client.get(f'/{self.link.link_hash}', format='json', follow=False)
         self.assertEqual(resp.status_code, status.HTTP_302_FOUND)
+
+    def test_using_redirection_link_increases_hit_counter(self):
+        self.assertEqual(self.link.hits, 0)
+        resp = self.api_client.get(f'/{self.link.link_hash}', format='json', follow=False)
+        self.assertEqual(resp.status_code, status.HTTP_302_FOUND)
+        
+        self.link.refresh_from_db()
+        self.assertAlmostEqual(self.link.hits, 1)
+
+        for _ in range(30):
+            resp = self.api_client.get(f'/{self.link.link_hash}', format='json', follow=False)
+            self.assertEqual(resp.status_code, status.HTTP_302_FOUND)
+
+        self.link.refresh_from_db()
+        self.assertAlmostEqual(self.link.hits, 31)
+
+        all_hits = self.link.link_hits.all()
+        self.assertEqual(len(all_hits), 31)
+
+    def test_hits_api(self):
+        for _ in range(100):
+            LinkHit.objects.create(link=self.link)
+        
+        for _ in range(70):
+            LinkHit.objects.create(link=self.other_link)
+        
+        resp = self.api_client.get(f'/links/{self.link.link_hash}/hits/', format='json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(resp.data), 100)
+
+        resp = self.api_client.get(f'/links/{self.other_link.link_hash}/hits/', format='json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(resp.data), 70)
+
+        resp = self.api_client.get(f'/hits/', format='json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(resp.data), 170)
